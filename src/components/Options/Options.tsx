@@ -17,7 +17,9 @@ const Options = ({
     <OptionsListStyled>
       {options.map((option) => (
         <li key={option}>
-          <ButtonStyled onClick={onLeaveFeedback}>{option}</ButtonStyled>
+          <ButtonStyled data-category={option} onClick={onLeaveFeedback}>
+            {option}
+          </ButtonStyled>
         </li>
       ))}
       {total > 0 && (
