@@ -2,50 +2,72 @@ import Feedback from "./Feedback/Feedback";
 import Options from "./Options/Options";
 import Section from "./Section/Section";
 import Description from "./Description/Description";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+interface IObjectKeys {
+  [key: string]: number;
+}
+
+interface IStatistics extends IObjectKeys {
+  good: number;
+  neutral: number;
+  bad: number;
+}
 
 function App() {
-  const [good, setGood] = useState(0);
-  const [neutral, setNeutral] = useState(0);
-  const [bad, setBad] = useState(0);
+  const initialState: IStatistics = {
+    good: 0,
+    neutral: 0,
+    bad: 0,
+  };
+
+  const [statistics, setStatistics] = useState((): IStatistics => {
+    const savedStatisticsValue =
+      window.localStorage.getItem("saved-statistics");
+
+    console.log(savedStatisticsValue);
+
+    if (savedStatisticsValue !== null) {
+      return JSON.parse(savedStatisticsValue);
+    }
+
+    return initialState;
+  });
+
+  useEffect(() => {
+    window.localStorage.setItem("saved-statistics", JSON.stringify(statistics));
+  }, [statistics]);
 
   const updateFeedback = (event: React.MouseEvent<HTMLButtonElement>) => {
-    let buttonText = null;
-
-    if (event.target instanceof HTMLElement) {
-      buttonText = event.target.innerHTML;
+    if (!(event.target instanceof HTMLButtonElement)) {
+      return;
     }
 
-    switch (buttonText) {
-      case "good":
-        setGood(good + 1);
-        break;
-      case "neutral":
-        setNeutral(neutral + 1);
-        break;
-      case "bad":
-        setBad(bad + 1);
-        break;
-      default:
-        break;
+    if (typeof event.target.dataset.category !== "string") {
+      return;
     }
+
+    const category: string = event.target.dataset.category;
+
+    setStatistics({
+      ...statistics,
+      [category]: statistics[category] + 1,
+    });
   };
 
   const resetFeedback = () => {
-    setGood(0);
-    setNeutral(0);
-    setBad(0);
+    setStatistics(initialState);
   };
 
   const countTotalFeedback = () => {
-    return good + neutral + bad;
+    return statistics.good + statistics.neutral + statistics.bad;
   };
 
   const countPositiveFeedbackPercentage = () => {
     const totalCount = countTotalFeedback();
 
     if (totalCount > 0) {
-      return Math.floor((good / totalCount) * 100);
+      return Math.floor((statistics.good / totalCount) * 100);
     }
 
     return 0;
@@ -69,9 +91,9 @@ function App() {
       </Section>
       <Section>
         <Feedback
-          good={good}
-          neutral={neutral}
-          bad={bad}
+          good={statistics.good}
+          neutral={statistics.neutral}
+          bad={statistics.bad}
           total={totalFeedback}
           positivePercentage={countPositiveFeedbackPercentage()}
         />
