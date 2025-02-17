@@ -25,8 +25,6 @@ function App() {
     const savedStatisticsValue =
       window.localStorage.getItem("saved-statistics");
 
-    console.log(savedStatisticsValue);
-
     if (savedStatisticsValue !== null) {
       return JSON.parse(savedStatisticsValue);
     }
